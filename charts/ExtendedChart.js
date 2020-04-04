@@ -732,6 +732,18 @@ sap.ui.define(
             oControl.setChartTitle(_buildTitle(oControl));
         }
 
+        BEExtendedChart.prototype.exit = function () {
+            if(this._overlay.button){
+                this._overlay.button.destroy();
+                this._overlay.button = null;
+            }
+            if(this._overlay.overlay){
+                document.getElementById("__be_extended_chart_overlay").remove();
+                this._overlay.overlay.remove();
+                this._overlay.overlay = null;
+            }
+        };
+
         BEExtendedChart.prototype.init = function () {
             StandardChart.prototype.init.apply(this, arguments);
             var that = this;
