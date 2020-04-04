@@ -525,10 +525,9 @@ sap.ui.define(
         BEExtendedChart.prototype.addMeasure = function (oInput) {
             this.removeAggregation("availableMeasures", oInput);
             this.addAggregation("measures", oInput);
-            if (!this._changeTracker) {
-                return;
-            }
-            this._changeTracker.add(oInput.flatten(), "measure");
+            if (this._changeTracker) {
+                this._changeTracker.add(oInput.flatten(), "measure");
+            }            
             _modelSetup(this);
         };
 
@@ -538,20 +537,18 @@ sap.ui.define(
             if (this._overlay) {
                 this._overlay.show();
             }
-            if (!this._changeTracker) {
-                return;
-            }
-            this._changeTracker.remove(oInput.flatten(), "measure");
+            if (this._changeTracker) {
+                this._changeTracker.remove(oInput.flatten(), "measure");
+            }            
             _modelSetup(this);
         };
 
         BEExtendedChart.prototype.addDimension = function (oInput) {
             this.removeAggregation("availableDimensions", oInput);
             this.addAggregation("dimensions", oInput);
-            if (!this._changeTracker) {
-                return;
+            if (this._changeTracker) {
+                this._changeTracker.add(oInput.flatten(), "dimension");
             }
-            this._changeTracker.add(oInput.flatten(), "dimension");
             _modelSetup(this);
         };
 
@@ -561,20 +558,18 @@ sap.ui.define(
             if (this._overlay) {
                 this._overlay.show();
             }
-            if (!this._changeTracker) {
-                return;
+            if (this._changeTracker) {
+                this._changeTracker.remove(oInput.flatten(), "dimension");
             }
-            this._changeTracker.remove(oInput.flatten(), "dimension");
             _modelSetup(this);
         };
 
         BEExtendedChart.prototype.addColor = function (oInput) {
             this.removeAggregation("availableDimensions", oInput);
             this.addAggregation("colors", oInput);
-            if (!this._changeTracker) {
-                return;
+            if (this._changeTracker) {
+                this._changeTracker.add(oInput.flatten(), "dimension");
             }
-            this._changeTracker.add(oInput.flatten(), "dimension");
             _modelSetup(this);
         };
 
@@ -584,10 +579,9 @@ sap.ui.define(
             if (this._overlay) {
                 this._overlay.show();
             }
-            if (!this._changeTracker) {
-                return;
+            if (this._changeTracker) {
+                this._changeTracker.remove(oInput.flatten(), "dimension");
             }
-            this._changeTracker.remove(oInput.flatten(), "dimension");
             _modelSetup(this);
         };
 
@@ -595,8 +589,10 @@ sap.ui.define(
             this._overlay.hide();
             this._createDataset();
             this.setChartTitle(_buildTitle(this));
-            this._changeTracker.reset();
             this._chart.setVisible(this.getMeasures().length > 0 && (this._currentChartConfig.minMeasures !== undefined ? this._currentChartConfig.minMeasures <= this.getMeasures().length : true));
+            if(this._changeTracker){
+                this._changeTracker.reset();
+            }
         }
 
         function _toggleConfigPanel(oControl) {
@@ -730,6 +726,7 @@ sap.ui.define(
             };
             _modelSetup(oControl);
             oControl.setChartTitle(_buildTitle(oControl));
+            oControl.update();
         }
 
         BEExtendedChart.prototype.exit = function () {
@@ -747,15 +744,12 @@ sap.ui.define(
         BEExtendedChart.prototype.init = function () {
             StandardChart.prototype.init.apply(this, arguments);
             var that = this;
-            if (this.getHeight() === "100%") {
-                this.setHeight("800px");
-            }
             this.setModel(new sap.ui.model.json.JSONModel(), "_internalModel");
             this.removeAllContent();
             this._splitterLayout = new Splitter();
             this.addButton("toggleConfig", {
                 icon: "sap-icon://customize",
-                tooltip: setTextForLabels("TOGGLE_CONFIG"),
+                tooltip: "TOGGLE_CONFIG",
                 press: function () {
                     _toggleConfigPanel(that);
                 }

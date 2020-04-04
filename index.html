@@ -6,31 +6,18 @@
 		<title>Custom controls</title>
 		<script
 			id="sap-ui-bootstrap"
-			src="https://sapui5.hana.ondemand.com/1.38.45/resources/sap-ui-core.js"
-			data-sap-ui-libs="sap.m, sap.ui.layout"
-			data-sap-ui-theme="sap_belize"
+			src="https://sapui5.hana.ondemand.com/resources/sap-ui-core.js"
+			data-sap-ui-theme="sap_fiori_3"
 			data-sap-ui-bindingSyntax="complex"
 			data-sap-ui-compatVersion="edge"
+			data-sap-ui-onInit="module:sap/ui/core/ComponentSupport"
 			data-sap-ui-resourceroots='{
-				"root": "./",
+				"res": "./",
 				"com.bearingpoint": "./charts"
 			}'
 		></script>
-		<style>
-			html,
-			body {
-				width: 100vw;
-				height: 100vh;
-				padding: 0;
-				margin: 0;
-			}
-			.ui-state-highlight {
-				height: 1.5em;
-				line-height: 1.2em;
-			}
-		</style>
 	</head>
 	<body class="sapUiBody" id="content">
-		<script src="index.js"></script>
+		<div data-sap-ui-component data-name="res"></div>
 	</body>
 </html>
