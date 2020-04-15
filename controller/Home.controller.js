@@ -4,8 +4,8 @@ sap.ui.define([
    "use strict";
    return BaseController.extend("res.controller.Home", {
       onNavPress: function (oEvent) {
-         var oBtn = oEvent.getSource(),
-            sRoute = oBtn.getText();
+         var oTile = oEvent.getSource(),
+            sRoute = oTile.getHeader();
          this.getOwnerComponent().getRouter().navTo(sRoute);
       }
    });

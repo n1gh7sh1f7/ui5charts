@@ -19,7 +19,12 @@ sap.ui.define(
         var BEExtendedChart = StandardChart.extend("com.bearingpoint.ExtendedChart", {
             "renderer": PanelRenderer,
             "metadata": {
-                "properties": {},
+                "properties": {
+                    "showLabels": {
+                        "type": "boolean",
+                        "defaultValue": true
+                    }
+                },
                 "aggregations": {
                     "availableMeasures": {
                         "multiple": true,
@@ -223,6 +228,17 @@ sap.ui.define(
             return chartTypeSelector;
         }
 
+        function _createShowLabelsToggle(oControl) {
+            return new sap.m.CheckBox({
+                text: "show labels",
+                selected: "{_internalModel>/showLabels}",
+                select: function (oEvent) {
+                    var bPressed = oEvent.getParameter("selected");
+                    oControl.setShowLabels(bPressed);
+                }
+            });
+        }
+
         function _onFeedRemove(oEvent, sType, oControl) {
             var oButton = oEvent.getSource(),
                 oListItem = oButton.getParent(),
@@ -411,7 +427,8 @@ sap.ui.define(
             var chartTypeSelector = _createChartTypeSelector(oControl),
                 measureSelector = _createMeasureSelector(oControl),
                 dimensionSelector = _createDimensionSelector(oControl),
-                colorSelector = _createColorSelector(oControl);
+                colorSelector = _createColorSelector(oControl),
+                showLabelsToggle = _createShowLabelsToggle(oControl);
             chartTypeSelector.addStyleClass("sapUiSizeCompact sapUiSmallMarginBottom");
             return new sap.ui.layout.VerticalLayout({
                 width: "100%",
@@ -429,6 +446,7 @@ sap.ui.define(
                         ]
                     }),
                     chartTypeSelector,
+                    showLabelsToggle,
                     measureSelector,
                     dimensionSelector,
                     colorSelector
@@ -482,10 +500,25 @@ sap.ui.define(
                 "availableDimensions": aAvailableDimensions.map(extractFeedDetails),
                 "chartTypes": oAddedTypes,
                 "selectedChartType": selectedChartType,
-                "showColorSelector": availableChartTypes[selectedChartType.type].bindings.color !== undefined
+                "showColorSelector": availableChartTypes[selectedChartType.type].bindings.color !== undefined,
+                "showLabels": oControl.getShowLabels()
             });
             oModel.refresh();
         }
+
+        BEExtendedChart.prototype.setShowLabels = function (bInput) {
+            this.setProperty("showLabels", bInput);
+            this.setVizProperties({
+                "plotArea": {
+                    "dataLabel": {
+                        "visible": bInput
+                    }
+                }
+            });
+            var oModel = this.getModel("_internalModel");
+            oModel.setProperty("/showLabels", bInput);
+            oModel.refresh();
+        };
 
         BEExtendedChart.prototype.setType = function (sInput) {
             this._chart.setVizType(sInput);
@@ -527,7 +560,7 @@ sap.ui.define(
             this.addAggregation("measures", oInput);
             if (this._changeTracker) {
                 this._changeTracker.add(oInput.flatten(), "measure");
-            }            
+            }
             _modelSetup(this);
         };
 
@@ -539,7 +572,7 @@ sap.ui.define(
             }
             if (this._changeTracker) {
                 this._changeTracker.remove(oInput.flatten(), "measure");
-            }            
+            }
             _modelSetup(this);
         };
 
@@ -590,7 +623,7 @@ sap.ui.define(
             this._createDataset();
             this.setChartTitle(_buildTitle(this));
             this._chart.setVisible(this.getMeasures().length > 0 && (this._currentChartConfig.minMeasures !== undefined ? this._currentChartConfig.minMeasures <= this.getMeasures().length : true));
-            if(this._changeTracker){
+            if (this._changeTracker) {
                 this._changeTracker.reset();
             }
         }
@@ -730,11 +763,11 @@ sap.ui.define(
         }
 
         BEExtendedChart.prototype.exit = function () {
-            if(this._overlay.button){
+            if (this._overlay.button) {
                 this._overlay.button.destroy();
                 this._overlay.button = null;
             }
-            if(this._overlay.overlay){
+            if (this._overlay.overlay) {
                 document.getElementById("__be_extended_chart_overlay").remove();
                 this._overlay.overlay.remove();
                 this._overlay.overlay = null;
