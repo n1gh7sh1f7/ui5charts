@@ -170,26 +170,36 @@ sap.ui.define(
 
         BEStandardChart.prototype._initTable = function () {
             var sModelName = this.getModelName(),
-                sEntity = this.getEntity();
+                sEntity = this.getEntity(),
+                sPath = "";
+            if (sModelName && sModelName.length > 0) {
+                sPath += sModelName + ">";
+            }
+            sPath += sEntity;
             this._table = new uiTable({
                 columns: {
                     path: "_internalModel>/table/columns",
                     factory: function (sId, oContext) {
                         var sName = oContext.getProperty("name"),
-                            sProp = oContext.getProperty("value");
+                            sProp = oContext.getProperty("value"),
+                            sPropPath = "";
+                        if (sModelName && sModelName.length > 0) {
+                            sPropPath += sModelName + ">";
+                        }
+                        sPropPath += sProp;
                         return new uiColumn(sId, {
                             name: sName,
                             label: sName,
                             sortProperty: sProp,
                             filterProperty: sProp,
                             template: new sap.m.Text({
-                                text: "{" + sModelName + ">" + sProp + "}"
+                                text: "{" + sPropPath + "}"
                             })
                         });
                     }
                 },
                 rows: {
-                    path: sModelName + ">" + sEntity
+                    path: sPath
                 }
             });
             this._tableContent = new ChartContainerContent({
