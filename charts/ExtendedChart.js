@@ -429,6 +429,8 @@ sap.ui.define(
                 dimensionSelector = _createDimensionSelector(oControl),
                 colorSelector = _createColorSelector(oControl),
                 showLabelsToggle = _createShowLabelsToggle(oControl);
+            oControl._chartTypeSelector = chartTypeSelector;
+            oControl._showLabelsToggle = showLabelsToggle;
             chartTypeSelector.addStyleClass("sapUiSizeCompact sapUiSmallMarginBottom");
             return new sap.ui.layout.VerticalLayout({
                 width: "100%",
@@ -621,6 +623,7 @@ sap.ui.define(
         BEExtendedChart.prototype.update = function () {
             this._overlay.hide();
             this._createDataset();
+            this._refreshTable();
             this.setChartTitle(_buildTitle(this));
             this._chart.setVisible(this.getMeasures().length > 0 && (this._currentChartConfig.minMeasures !== undefined ? this._currentChartConfig.minMeasures <= this.getMeasures().length : true));
             if (this._changeTracker) {
@@ -777,7 +780,6 @@ sap.ui.define(
         BEExtendedChart.prototype.init = function () {
             StandardChart.prototype.init.apply(this, arguments);
             var that = this;
-            this.setModel(new sap.ui.model.json.JSONModel(), "_internalModel");
             this.removeAllContent();
             this._splitterLayout = new Splitter();
             this.addButton("toggleConfig", {
@@ -794,6 +796,11 @@ sap.ui.define(
             this._splitterLayout.addContentArea(this._configPanel);
             this.addContent(this._splitterLayout);
             _createOverlay(this);
+            this._chartContainer.attachContentChange(function (oEvent) {
+                var sSelected = oEvent.getParameter("selectedItemId");
+                that._chartTypeSelector.setVisible(sSelected.indexOf("table") < 0);
+                that._showLabelsToggle.setVisible(sSelected.indexOf("table") < 0);
+            });
             this.addEventDelegate({
                 onAfterRendering: function () {
                     _initSortable(that);
@@ -809,6 +816,7 @@ sap.ui.define(
             }
             setTimeout(function () {
                 _startup(that);
+                that._refreshTable();
             }, 0);
         };
         return BEExtendedChart;

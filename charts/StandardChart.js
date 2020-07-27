@@ -3,9 +3,11 @@ sap.ui.define(
         "sap/m/PanelRenderer",
         "com/bearingpoint/ChartContainer",
         "sap/suite/ui/commons/ChartContainerContent",
-        "com/bearingpoint/SimpleChart"
+        "com/bearingpoint/SimpleChart",
+        "sap/ui/table/Table",
+        "sap/ui/table/Column"
     ],
-    function (PanelRenderer, ChartContainer, ChartContainerContent, SimpleChart) {
+    function (PanelRenderer, ChartContainer, ChartContainerContent, SimpleChart, uiTable, uiColumn) {
         "use strict";
         $.sap.require("com.bearingpoint.ChartFeedItem");
         var BEStandardChart = SimpleChart.extend("com.bearingpoint.StandardChart", {
@@ -47,6 +49,14 @@ sap.ui.define(
                     downloadFileName: {
                         type: "string",
                         defaultValue: "Chart"
+                    },
+                    "enableChartView": {
+                        "type": "boolean",
+                        "defaultValue": true
+                    },
+                    "enableTableView": {
+                        "type": "boolean",
+                        "defaultValue": true
                     }
                 },
                 aggregations: {}
@@ -126,22 +136,97 @@ sap.ui.define(
             this._customIcons.splice(idx, 1);
         };
 
+        BEStandardChart.prototype._refreshTable = function () {
+            var dimensions = this.getDimensions(),
+                colors = this.getColors(),
+                measures = this.getMeasures(),
+                internalModel = this.getModel("_internalModel"),
+                columns;
+            columns = dimensions.map(function (item) {
+                return {
+                    name: item.getName(),
+                    value: item.getValue()
+                };
+            });
+            columns = colors.reduce(function (a, b) {
+                a.push({
+                    name: b.getName(),
+                    value: b.getValue()
+                });
+                return a;
+            }, columns);
+            columns = measures.reduce(function (a, b) {
+                a.push({
+                    name: b.getName(),
+                    value: b.getValue()
+                });
+                return a;
+            }, columns);
+            internalModel.setProperty("/table", {
+                columns: columns
+            });
+            internalModel.refresh();
+        };
+
+        BEStandardChart.prototype._initTable = function () {
+            var sModelName = this.getModelName(),
+                sEntity = this.getEntity();
+            this._table = new uiTable({
+                columns: {
+                    path: "_internalModel>/table/columns",
+                    factory: function (sId, oContext) {
+                        var sName = oContext.getProperty("name"),
+                            sProp = oContext.getProperty("value");
+                        return new uiColumn(sId, {
+                            name: sName,
+                            label: sName,
+                            sortProperty: sProp,
+                            filterProperty: sProp,
+                            template: new sap.m.Text({
+                                text: "{" + sModelName + ">" + sProp + "}"
+                            })
+                        });
+                    }
+                },
+                rows: {
+                    path: sModelName + ">" + sEntity
+                }
+            });
+            this._tableContent = new ChartContainerContent({
+                content: this._table,
+                icon: "sap-icon://table-view"
+            });
+            this._chartContainer.addContent(this._tableContent);
+            this._refreshTable();
+        };
+
         BEStandardChart.prototype.init = function () {
             SimpleChart.prototype.init.apply(this, arguments);
+            var that = this;
             this.removeAllContent();
+            this.setModel(new sap.ui.model.json.JSONModel(), "_internalModel");
             this._customIcons = [];
-            this._chartContainerContent = new ChartContainerContent({
-                content: this._chart
+            this._chartContent = new ChartContainerContent({
+                content: this._chart,
+                icon: "sap-icon://vertical-bar-chart"
             });
             this._chartContainer = new ChartContainer({
                 autoAdjustHeight: true,
                 showLegend: this.getShowLegend(),
                 showLegendButton: this.getShowLegendButton(),
                 showZoom: this.getShowZoom(),
-                showFullScreen: this.getShowFullScreen(),
-                content: [this._chartContainerContent]
+                showFullScreen: this.getShowFullScreen()
             });
             this.addContent(this._chartContainer);
+            setTimeout(function () {
+                if (that.getEnableChartView()) {
+                    that._chartContainer.addContent(that._chartContent);
+                }
+                if (that.getEnableTableView()) {
+                    that._initTable();
+                    that._refreshTable();
+                }
+            }, 0);
         };
 
         return BEStandardChart;

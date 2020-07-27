@@ -1,7 +1,7 @@
 sap.ui.define([
-    "sap/suite/ui/commons/ChartContainer",
-    "sap/suite/ui/commons/ChartContainerRenderer"
-], function(
+	"sap/suite/ui/commons/ChartContainer",
+	"sap/suite/ui/commons/ChartContainerRenderer"
+], function (
 	ChartContainer,
 	ChartContainerRenderer
 ) {
@@ -10,7 +10,7 @@ sap.ui.define([
 		"renderer": ChartContainerRenderer
 	});
 
-	BEChartContainer.prototype._performHeightChanges = function() {
+	BEChartContainer.prototype._performHeightChanges = function () {
 		var $Toolbar,
 			$VizFrame;
 
@@ -30,7 +30,9 @@ sap.ui.define([
 				var iNewChartHeight = iChartContainerHeight - iToolBarHeight - iToolbarBottomBorder;
 				var iExistingChartHeight = $VizFrame.height();
 				oInnerChart = oSelectedContent.getContent();
-				if ((oInnerChart instanceof sap.viz.ui5.controls.VizFrame) || (oInnerChart instanceof sap.ui.vbm.AnalyticMap) || (sap.chart && sap.chart.Chart && oInnerChart instanceof sap.chart.Chart)) {
+				if ((oInnerChart instanceof sap.viz.ui5.controls.VizFrame) ||
+					(sap.ui && sap.ui.vbm && sap.ui.vbm.AnalyticMap && oInnerChart instanceof sap.ui.vbm.AnalyticMap) ||
+					(sap.chart && sap.chart.Chart && oInnerChart instanceof sap.chart.Chart)) {
 					if (iNewChartHeight > 0 && iNewChartHeight !== iExistingChartHeight) {
 						this._rememberOriginalHeight(oInnerChart);
 						oInnerChart.setHeight(iNewChartHeight + "px");
