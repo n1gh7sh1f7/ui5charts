@@ -143,7 +143,7 @@ sap.ui.define(
                         arr.forEach(function (item) {
                             oControl.addMeasure(item);
                         });
-                        oControl._overlay.show();
+                        // oControl._overlay.show();
                     }
                 })
                 .disableSelection();
@@ -162,7 +162,7 @@ sap.ui.define(
                         arr.forEach(function (item) {
                             oControl.addDimension(item);
                         });
-                        oControl._overlay.show();
+                        // oControl._overlay.show();
                     }
                 })
                 .disableSelection();
@@ -181,7 +181,7 @@ sap.ui.define(
                         arr.forEach(function (item) {
                             oControl.addColor(item);
                         });
-                        oControl._overlay.show();
+                        // oControl._overlay.show();
                     }
                 })
                 .disableSelection();
@@ -317,7 +317,7 @@ sap.ui.define(
                     width: "100%",
                     text: "OK",
                     press: function () {
-                        oControl._overlay.show();
+                        // oControl._overlay.show();
                         var selectedItems = oAvailableList.getSelectedItems(), itemNames;
                         oPopover.close();
                         itemNames = selectedItems.map(function (item) {
@@ -432,26 +432,35 @@ sap.ui.define(
             oControl._chartTypeSelector = chartTypeSelector;
             oControl._showLabelsToggle = showLabelsToggle;
             chartTypeSelector.addStyleClass("sapUiSizeCompact sapUiSmallMarginBottom");
-            return new sap.ui.layout.VerticalLayout({
-                width: "100%",
+            return new sap.m.Panel({
+                expandable: false,
+                expanded: true,
+                headerToolbar: new sap.m.Toolbar({
+                    content: [
+                        new sap.m.Title({
+                            text: "Configuration"
+                        }),
+                        new sap.m.ToolbarSpacer(),
+                        new sap.m.Button({
+                            icon: "sap-icon://sys-help",
+                            press: _openHelpDialog
+                        })
+                    ]
+                }),
                 content: [
-                    new sap.m.Toolbar({
-                        content: [
-                            new sap.m.Title({
-                                text: "Configuration"
-                            }),
-                            new sap.m.ToolbarSpacer(),
-                            new sap.m.Button({
-                                icon: "sap-icon://sys-help",
-                                press: _openHelpDialog
-                            })
-                        ]
-                    }),
                     chartTypeSelector,
                     showLabelsToggle,
                     measureSelector,
                     dimensionSelector,
-                    colorSelector
+                    colorSelector,
+                    new sap.m.Button({
+                        text: "Apply changes",
+                        width: "100%",
+                        press: function () {
+                            oControl.fireFeedChange(oControl._changeTracker.get());
+                            oControl.update();
+                        }
+                    })
                 ]
             });
         }
@@ -570,7 +579,7 @@ sap.ui.define(
             this.removeAggregation("measures", oInput);
             this.addAggregation("availableMeasures", oInput);
             if (this._overlay) {
-                this._overlay.show();
+                // this._overlay.show();
             }
             if (this._changeTracker) {
                 this._changeTracker.remove(oInput.flatten(), "measure");
@@ -591,7 +600,7 @@ sap.ui.define(
             this.removeAggregation("dimensions", oInput);
             this.addAggregation("availableDimensions", oInput);
             if (this._overlay) {
-                this._overlay.show();
+                // this._overlay.show();
             }
             if (this._changeTracker) {
                 this._changeTracker.remove(oInput.flatten(), "dimension");
@@ -612,7 +621,7 @@ sap.ui.define(
             this.removeAggregation("colors", oInput);
             this.addAggregation("availableDimensions", oInput);
             if (this._overlay) {
-                this._overlay.show();
+                // this._overlay.show();
             }
             if (this._changeTracker) {
                 this._changeTracker.remove(oInput.flatten(), "dimension");
