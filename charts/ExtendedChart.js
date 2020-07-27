@@ -432,22 +432,21 @@ sap.ui.define(
             oControl._chartTypeSelector = chartTypeSelector;
             oControl._showLabelsToggle = showLabelsToggle;
             chartTypeSelector.addStyleClass("sapUiSizeCompact sapUiSmallMarginBottom");
-            return new sap.m.Panel({
-                expandable: false,
-                expanded: true,
-                headerToolbar: new sap.m.Toolbar({
-                    content: [
-                        new sap.m.Title({
-                            text: "Configuration"
-                        }),
-                        new sap.m.ToolbarSpacer(),
-                        new sap.m.Button({
-                            icon: "sap-icon://sys-help",
-                            press: _openHelpDialog
-                        })
-                    ]
-                }),
+            return new sap.ui.layout.VerticalLayout({
+                width: "100%",
                 content: [
+                    new sap.m.Toolbar({
+                        content: [
+                            new sap.m.Title({
+                                text: "Configuration"
+                            }),
+                            new sap.m.ToolbarSpacer(),
+                            new sap.m.Button({
+                                icon: "sap-icon://sys-help",
+                                press: _openHelpDialog
+                            })
+                        ]
+                    }),
                     chartTypeSelector,
                     showLabelsToggle,
                     measureSelector,
