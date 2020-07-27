@@ -816,6 +816,7 @@ sap.ui.define(
             }
             setTimeout(function () {
                 _startup(that);
+
                 that._refreshTable();
             }, 0);
         };

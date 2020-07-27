@@ -13,12 +13,10 @@ sap.ui.define([
 	BEChartContainer.prototype._performHeightChanges = function () {
 		var $Toolbar,
 			$VizFrame;
-
 		if (this.getAutoAdjustHeight() || this.getFullScreen()) {
 			var $this = this.$(),
 				oSelectedContent,
 				oInnerChart;
-
 			$Toolbar = $this.find(".sapSuiteUiCommonsChartContainerToolBarArea :first");
 			//Only adjust height after both toolbar and chart are rendered in the DOM.
 			$VizFrame = $this.find(".sapSuiteUiCommonsChartContainerChartArea :first");

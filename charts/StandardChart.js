@@ -224,6 +224,7 @@ sap.ui.define(
                 }
                 if (that.getEnableTableView()) {
                     that._initTable();
+
                     that._refreshTable();
                 }
             }, 0);
