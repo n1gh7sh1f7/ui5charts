@@ -5,9 +5,11 @@ sap.ui.define(
         "sap/suite/ui/commons/ChartContainerContent",
         "com/bearingpoint/SimpleChart",
         "sap/ui/table/Table",
-        "sap/ui/table/Column"
+        "sap/ui/table/Column",
+        "sap/ui/core/util/Export",
+        "sap/ui/core/util/ExportTypeCSV"
     ],
-    function (PanelRenderer, ChartContainer, ChartContainerContent, SimpleChart, uiTable, uiColumn) {
+    function (PanelRenderer, ChartContainer, ChartContainerContent, SimpleChart, uiTable, uiColumn, Export, ExportTypeCSV) {
         "use strict";
         $.sap.require("com.bearingpoint.ChartFeedItem");
         var BEStandardChart = SimpleChart.extend("com.bearingpoint.StandardChart", {
@@ -107,7 +109,11 @@ sap.ui.define(
                     icon: "sap-icon://download",
                     tooltip: "DOWNLOAD",
                     press: function () {
-                        that.downloadChart(that.getDownloadFileName());
+                        if (that._chartSelected) {
+                            that.downloadChart(that.getDownloadFileName());
+                        } else {
+                            that.downloadTable(that.getDownloadFileName())
+                        }
                     }
                 });
             } else {
@@ -134,6 +140,58 @@ sap.ui.define(
             var idx = this._customIcons.indexOf(btnID);
             this._chartContainer.removeCustomIcon(idx);
             this._customIcons.splice(idx, 1);
+        };
+
+        BEStandardChart.prototype.downloadTable = function (fileName) {
+            var that = this,
+                modelName = this.getModelName(),
+                entity = this.getEntity(),
+                measures = this.getMeasures(),
+                dimensions = this.getDimensions(),
+                colors = this.getColors(),
+                columns;
+            columns = dimensions.map(function (item) {
+                return {
+                    name: item.getName(),
+                    value: item.getValue()
+                };
+            });
+            columns = colors.reduce(function (a, b) {
+                a.push({
+                    name: b.getName(),
+                    value: b.getValue()
+                });
+                return a;
+            }, columns);
+            columns = measures.reduce(function (a, b) {
+                a.push({
+                    name: b.getName(),
+                    value: b.getValue()
+                });
+                return a;
+            }, columns);
+            var oExport = new Export({
+                exportType: new ExportTypeCSV({
+                    separatorChar: ";"
+                }),
+                models: that.getModel(modelName),
+                rows: {
+                    path: entity
+                },
+                columns: columns.map(function (col) {
+                    return {
+                        name: col.name,
+                        template: {
+                            content: "{" + col.value + "}"
+                        }
+                    };
+                })
+            });
+            oExport.saveFile(fileName).catch(function (oError) {
+                sap.m.MessageBox.error("Error when downloading data. Browser might not be supported!\n\n" + oError);
+            }).then(function () {
+                oExport.destroy();
+            });
         };
 
         BEStandardChart.prototype._refreshTable = function () {
@@ -227,6 +285,8 @@ sap.ui.define(
                 showZoom: this.getShowZoom(),
                 showFullScreen: this.getShowFullScreen()
             });
+            this._chartSelected = true;
+            this._tableSelected = false;
             this.addContent(this._chartContainer);
             setTimeout(function () {
                 if (that.getEnableChartView()) {
@@ -234,8 +294,12 @@ sap.ui.define(
                 }
                 if (that.getEnableTableView()) {
                     that._initTable();
-
                     that._refreshTable();
+                    that._chartContainer.attachContentChange(function (oEvent) {
+                        var itemID = oEvent.getParameter("selectedItemId");
+                        that._tableSelected = itemID.indexOf("table") > -1;
+                        that._chartSelected = itemID.indexOf("table") < 0;
+                    });
                 }
             }, 0);
         };
