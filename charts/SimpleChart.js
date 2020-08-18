@@ -22,6 +22,10 @@ sap.ui.define(
                         type: "string",
                         defaultValue: "/"
                     },
+                    parameters: {
+                        type: "object",
+                        defaultValue: {}
+                    },
                     title: {
                         type: "string",
                         defaultValue: ""
@@ -291,11 +295,15 @@ sap.ui.define(
         BESimpleChart.prototype._createDataset = function () {
             var sModelName = this.getModelName(),
                 sEntity = this.getEntity(),
+                oParameters = this.getParameters(),
                 dimensions = this.getDimensions(),
                 measures = this.getMeasures(),
                 colors = this.getColors(),
                 chartType = this._chart.getVizType(),
-                feedMeasures, feedDimensions, feedColors;
+                boundModel = this.getModel(sModelName),
+                internalDataModel = new sap.ui.model.json.JSONModel(),
+                modelType, feedMeasures, feedDimensions, feedColors, allDimensions;
+            modelType = this.getModel(sModelName) instanceof sap.ui.model.odata.v4.ODataModel ? "odata" : "json";
             this._chart.destroyDataset();
             this._chart.destroyFeeds();
             if (sModelName && sModelName.length > 0) {
@@ -308,20 +316,57 @@ sap.ui.define(
                 this._chart.setVisible(false);
                 return;
             }
+            allDimensions = dimensions.slice();
+            if (_chartTypes[chartType].bindings.color) {
+                allDimensions = allDimensions.concat(colors);
+            }
+            if (modelType === "odata") {
+                oParameters.$$aggregation = {
+                    aggregate: measures.reduce(function (res, m) {
+                        res[m.getName()] = {
+                            name: m.getValue(),
+                            with: "sum"
+                        };
+                        return res;
+                    }, {}),
+                    group: allDimensions.reduce(function (res, d) {
+                        res[d.getValue()] = {};
+                        return res
+                    }, {})
+                };
+                var aSorters = allDimensions.map(function (feed) {
+                    return new sap.ui.model.Sorter(feed.getValue());
+                });
+                aSorters = aSorters.concat(measures.map(function (feed) {
+                    return new sap.ui.model.Sorter(feed.getName());
+                }));
+                var oBinding = boundModel.bindList(sEntity, null, aSorters, null, oParameters);
+                oBinding.requestContexts().then(function (contexts) {
+                    var items = contexts.map(function (ctx) {
+                        return ctx.getObject();
+                    });
+                    internalDataModel.setProperty("/", Array.from(items));
+                    internalDataModel.refresh();
+                });
+            }
+            if (modelType === "json") {
+                internalDataModel.setProperty("/", boundModel.getProperty(sEntity));
+                internalDataModel.refresh();
+            }
             var dataset = new sap.viz.ui5.data.FlattenedDataset({
                 data: {
-                    path: sModelName + sEntity
+                    path: "__internalDataModel>/"
                 },
-                dimensions: dimensions.concat(colors).map(function (item) {
+                dimensions: allDimensions.map(function (item) {
                     return new sap.viz.ui5.data.DimensionDefinition({
                         name: item.getName(),
-                        value: "{" + sModelName + item.getValue() + "}"
+                        value: "{__internalDataModel>" + item.getValue() + "}"
                     });
                 }),
                 measures: measures.map(function (item) {
                     return new sap.viz.ui5.data.MeasureDefinition({
                         name: item.getName(),
-                        value: "{" + sModelName + item.getValue() + "}"
+                        value: "{__internalDataModel>" + (modelType === "odata" ? item.getName() : item.getValue()) + "}"
                     });
                 })
             });
@@ -349,36 +394,37 @@ sap.ui.define(
                     values: feedColors
                 }));
             }
+            this.setModel(internalDataModel, "__internalDataModel");
         };
 
         BESimpleChart.prototype.addMeasure = function (oInput) {
             this.addAggregation("measures", oInput);
-            this._createDataset();
+            // this._createDataset();
         };
 
         BESimpleChart.prototype.removeMeasure = function (oInput) {
             this.removeAggregation("measures", oInput);
-            this._createDataset();
+            // this._createDataset();
         };
 
         BESimpleChart.prototype.addDimension = function (oInput) {
             this.addAggregation("dimensions", oInput);
-            this._createDataset();
+            // this._createDataset();
         };
 
         BESimpleChart.prototype.removeDimension = function (oInput) {
             this.removeAggregation("dimensions", oInput);
-            this._createDataset();
+            // this._createDataset();
         };
 
         BESimpleChart.prototype.addColor = function (oInput) {
             this.addAggregation("colors", oInput);
-            this._createDataset();
+            // this._createDataset();
         };
 
         BESimpleChart.prototype.removeColor = function (oInput) {
             this.removeAggregation("colors", oInput);
-            this._createDataset();
+            // this._createDataset();
         };
 
         BESimpleChart.prototype.downloadChart = function (fileName) {
@@ -505,21 +551,13 @@ sap.ui.define(
 
         BESimpleChart.prototype.init = function () {
             Panel.prototype.init.apply(this, arguments);
+            var that = this;
             this.addStyleClass("sapUiNoContentPadding");
             if (this.getHeight() === "auto") {
                 this.setHeight("100%");
             }
             this.setExpandable(false);
             this.setExpanded(true);
-            this._hasInit = false;
-            this.addEventDelegate({
-                onAfterRendering: function () {
-                    if (!this._hasInit) {
-                        this._createDataset();
-                        this._hasInit = true;
-                    }
-                }
-            }, this);
             this._chart = new sap.viz.ui5.controls.VizFrame({
                 uiConfig: {
                     applicationSet: "fiori"
@@ -533,6 +571,9 @@ sap.ui.define(
                 }
             });
             this.addContent(this._chart);
+            setTimeout(function () {
+                that._createDataset();
+            }, 0);
         };
 
         return BESimpleChart;

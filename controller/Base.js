@@ -16,36 +16,31 @@ sap.ui.define([
 			}
 		},
 		onRouteMatched: function () {
-			this.getView().setModel(new sap.ui.model.json.JSONModel({
+			var oChartConfigModel = new sap.ui.model.json.JSONModel({
 				measures: [
 					{
-						name: "CO₂",
-						value: "CO2"
-					},
-					{
-						name: "CO₂e (WTT)",
-						value: "CO2_E_WTT"
-					},
-					{
-						name: "CO₂e (TTW)",
-						value: "CO2_E_TTW"
+						name: "Stock",
+						value: "quantity"
 					}
 				],
 				availableMeasures: [],
 				dimensions: [
 					{
-						name: "Fiscal year",
-						value: "FY"
-					},
-					{
-						name: "Fiscal period",
-						value: "FP"
+						name: "Yard",
+						value: "yardName"
 					}
 				],
 				availableDimensions: [],
-				colors: [],
+				colors: [
+					{
+						name: "Resource type",
+						value: "resourceType"
+					}
+				],
 				availableColors: []
-			}), "chartConfig");
+			});
+			this.getView().setModel(oChartConfigModel, "chartConfig");
+			oChartConfigModel.refresh(true);
 		}
 	});
 });

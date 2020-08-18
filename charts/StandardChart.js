@@ -199,7 +199,9 @@ sap.ui.define(
                 colors = this.getColors(),
                 measures = this.getMeasures(),
                 internalModel = this.getModel("_internalModel"),
-                columns;
+                sModelName = this.getModelName(),
+                columns, modelType;
+            modelType = this.getModel(sModelName) instanceof sap.ui.model.odata.v4.ODataModel ? "odata" : "json";
             columns = dimensions.map(function (item) {
                 return {
                     name: item.getName(),
@@ -216,7 +218,7 @@ sap.ui.define(
             columns = measures.reduce(function (a, b) {
                 a.push({
                     name: b.getName(),
-                    value: b.getValue()
+                    value: modelType === "odata" ? b.getName() : b.getValue()
                 });
                 return a;
             }, columns);
@@ -227,37 +229,25 @@ sap.ui.define(
         };
 
         BEStandardChart.prototype._initTable = function () {
-            var sModelName = this.getModelName(),
-                sEntity = this.getEntity(),
-                sPath = "";
-            if (sModelName && sModelName.length > 0) {
-                sPath += sModelName + ">";
-            }
-            sPath += sEntity;
             this._table = new uiTable({
                 columns: {
                     path: "_internalModel>/table/columns",
                     factory: function (sId, oContext) {
                         var sName = oContext.getProperty("name"),
-                            sProp = oContext.getProperty("value"),
-                            sPropPath = "";
-                        if (sModelName && sModelName.length > 0) {
-                            sPropPath += sModelName + ">";
-                        }
-                        sPropPath += sProp;
+                            sProp = oContext.getProperty("value");
                         return new uiColumn(sId, {
                             name: sName,
                             label: sName,
                             sortProperty: sProp,
                             filterProperty: sProp,
                             template: new sap.m.Text({
-                                text: "{" + sPropPath + "}"
+                                text: "{__internalDataModel>" + sProp + "}"
                             })
                         });
                     }
                 },
                 rows: {
-                    path: sPath
+                    path: "__internalDataModel>/"
                 }
             });
             this._tableContent = new ChartContainerContent({

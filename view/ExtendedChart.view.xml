@@ -1,8 +1,9 @@
 <mvc:view id="ExtendedChart" viewName="res.view.ExtendedChart" controllerName="res.controller.ExtendedChart" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:be="com.bearingpoint">
     <Page id="ExtendedChartPage" title="Extended Chart" showNavButton="true" navButtonPress="onNavBack">
         <be:ExtendedChart 
-            type="stacked_column" 
-            modelName="chartData"
+            type="column" 
+            modelName="catalog"
+            entity="/ResourceStock"
             showLegend="true" 
             showTitle="true" 
             containerTitle="Dynamic Report"

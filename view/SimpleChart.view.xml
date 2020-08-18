@@ -1,8 +1,9 @@
 <mvc:view id="SimpleChart" viewName="res.view.SimpleChart" controllerName="res.controller.SimpleChart" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:be="com.bearingpoint">
     <Page id="SimpleChartPage" title="Simple Chart" showNavButton="true" navButtonPress="onNavBack">
         <be:SimpleChart  
-            type="stacked_column" 
-            modelName="chartData"
+            type="column" 
+            modelName="catalog"
+            entity="/ResourceStock"
             showLegend="true" 
             vizProperties='{
 				plotArea: {

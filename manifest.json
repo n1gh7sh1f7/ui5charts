@@ -9,7 +9,7 @@
         },
         "dataSources": {
             "catalog": {
-                "uri": "/odata/catalog/",
+                "uri": "/catalog/",
                 "type": "OData",
                 "settings": {
                     "odataVersion": "4.0"
@@ -56,7 +56,7 @@
                     "synchronizationMode": "None",
                     "operationMode": "Server",
                     "groupId": "$auto",
-                    "autoExpandSelect": true
+                    "autoExpandSelect": false
                 }
             }
         },

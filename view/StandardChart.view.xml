@@ -1,8 +1,9 @@
 <mvc:view id="StandardChart" viewName="res.view.StandardChart" controllerName="res.controller.StandardChart" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:be="com.bearingpoint">
     <Page id="StandardChartPage" title="Standard Chart" showNavButton="true" navButtonPress="onNavBack">
         <be:StandardChart 
-            type="stacked_column" 
-            modelName="chartData"
+            type="column" 
+            modelName="catalog"
+            entity="/ResourceStock"
             showLegend="true" 
             showChartTitle="true"
             chartTitle="Chart"
