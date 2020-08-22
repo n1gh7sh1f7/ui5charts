@@ -1,0 +1,114 @@
+{
+    "_version": "1.20.0",
+    "start_url": "index.html",
+    "sap.app": {
+        "id": "res",
+        "type": "application",
+        "applicationVersion": {
+            "version": "1.0.0"
+        },
+        "dataSources": {
+            "catalog": {
+                "uri": "/catalog/",
+                "type": "OData",
+                "settings": {
+                    "odataVersion": "4.0"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        },
+        "supportedThemes": [
+            "sap_fiori_3",
+            "sap_belize"
+        ],
+        "fullWidth": true
+    },
+    "sap.ui5": {
+        "rootView": {
+            "viewName": "res.view.App",
+            "type": "XML",
+            "async": true,
+            "id": "app"
+        },
+        "dependencies": {
+            "minUI5Version": "1.60",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.layout": {},
+                "sap.viz": {}
+            }
+        },
+        "models": {
+            "chartData": {
+                "type": "sap.ui.model.json.JSONModel",
+                "uri": "model/chartData.json"
+            },
+            "catalog": {
+                "dataSource": "catalog",
+                "settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "groupId": "$auto",
+                    "autoExpandSelect": false
+                }
+            }
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "viewType": "XML",
+                "viewPath": "res.view",
+                "controlId": "app",
+                "controlAggregation": "pages",
+                "async": true
+            },
+            "routes": [
+                {
+                    "pattern": "",
+                    "name": "Home",
+                    "target": "Home"
+                },
+                {
+                    "pattern": "SimpleChart",
+                    "name": "SimpleChart",
+                    "target": "SimpleChart"
+                },
+                {
+                    "pattern": "StandardChart",
+                    "name": "StandardChart",
+                    "target": "StandardChart"
+                },
+                {
+                    "pattern": "ExtendedChart",
+                    "name": "ExtendedChart",
+                    "target": "ExtendedChart"
+                }
+            ],
+            "targets": {
+                "Home": {
+                    "viewId": "Home",
+                    "viewName": "Home"
+                },
+                "SimpleChart": {
+                    "viewId": "SimpleChart",
+                    "viewName": "SimpleChart"
+                },
+                "StandardChart": {
+                    "viewId": "StandardChart",
+                    "viewName": "StandardChart"
+                },
+                "ExtendedChart": {
+                    "viewId": "ExtendedChart",
+                    "viewName": "ExtendedChart"
+                }
+            }
+        }
+    }
+}

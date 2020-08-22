@@ -1,0 +1,34 @@
+<mvc:view id="SimpleChart" viewName="res.view.SimpleChart" controllerName="res.controller.SimpleChart" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:be="com.bearingpoint">
+    <Page id="SimpleChartPage" title="Simple Chart" showNavButton="true" navButtonPress="onNavBack">
+        <be:SimpleChart  
+            type="column" 
+            modelName="catalog"
+            entity="/ResourceStock"
+            showLegend="true" 
+            vizProperties='{
+				plotArea: {
+					dataLabel: {
+						visible: true,
+						formatString: "ShortFloat"
+					}
+				},
+				tooltip: {
+					visible: true,
+					formatString: "StandardFloat"
+				}
+			}'
+            measures="{chartConfig>/measures}"
+            dimensions="{chartConfig>/dimensions}"
+            colors="{chartConfig>/colors}">
+            <be:measures>
+                <be:ChartFeedItem name="{chartConfig>name}" value="{chartConfig>value}" />
+            </be:measures>
+            <be:dimensions>
+                <be:ChartFeedItem name="{chartConfig>name}" value="{chartConfig>value}" />
+            </be:dimensions>
+            <be:colors>
+                <be:ChartFeedItem name="{chartConfig>name}" value="{chartConfig>value}" />
+            </be:colors>
+        </be:SimpleChart>
+    </Page>
+</mvc:view>

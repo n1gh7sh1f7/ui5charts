@@ -1,0 +1,9 @@
+<mvc:view id="Home" viewName="res.view.Home" controllerName="res.controller.Home" xmlns:mvc="sap.ui.core.mvc" xmlns:l="sap.ui.layout" xmlns="sap.m">
+    <Page id="HomePage" title="Home" enableScrolling="false">
+        <l:Grid>
+            <GenericTile header="SimpleChart" press="onNavPress" />
+            <GenericTile header="StandardChart" press="onNavPress" />
+            <GenericTile header="ExtendedChart" press="onNavPress" />
+        </l:Grid>
+    </Page>
+</mvc:view>

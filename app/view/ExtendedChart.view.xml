@@ -1,0 +1,48 @@
+<mvc:view id="ExtendedChart" viewName="res.view.ExtendedChart" controllerName="res.controller.ExtendedChart" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:be="com.bearingpoint">
+    <Page id="ExtendedChartPage" title="Extended Chart" showNavButton="true" navButtonPress="onNavBack">
+        <be:ExtendedChart 
+            type="column" 
+            modelName="catalog"
+            entity="/ResourceStock"
+            showLegend="true" 
+            showTitle="true" 
+            containerTitle="Dynamic Report"
+            showChartTitle="true"
+            chartTitle="Chart"
+            enableDownload="true"
+            feedChange="onFeedChange"
+            vizProperties='{
+				plotArea: {
+					dataLabel: {
+						visible: true,
+						formatString: "ShortFloat"
+					}
+				},
+				tooltip: {
+					visible: true,
+					formatString: "StandardFloat"
+				}
+			}'
+            availableMeasures="{chartConfig>/availableMeasures}"
+            availableDimensions="{chartConfig>/availableDimensions}"
+            measures="{chartConfig>/measures}"
+            dimensions="{chartConfig>/dimensions}"
+            colors="{chartConfig>/colors}">
+            <be:availableMeasures>
+                <be:ChartFeedItem name="{chartConfig>name}" value="{chartConfig>value}" />
+            </be:availableMeasures>
+            <be:availableDimensions>
+                <be:ChartFeedItem name="{chartConfig>name}" value="{chartConfig>value}" />
+            </be:availableDimensions>
+            <be:measures>
+                <be:ChartFeedItem name="{chartConfig>name}" value="{chartConfig>value}" />
+            </be:measures>
+            <be:dimensions>
+                <be:ChartFeedItem name="{chartConfig>name}" value="{chartConfig>value}" />
+            </be:dimensions>
+            <be:colors>
+                <be:ChartFeedItem name="{chartConfig>name}" value="{chartConfig>value}" />
+            </be:colors>
+        </be:ExtendedChart>
+    </Page>
+</mvc:view>
