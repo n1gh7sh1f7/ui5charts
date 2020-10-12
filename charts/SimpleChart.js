@@ -7,60 +7,62 @@ sap.ui.define(
     function (Panel, PanelRenderer, ChartFeedItem) {
         "use strict";
         var BESimpleChart = Panel.extend("com.bearingpoint.SimpleChart", {
-            renderer: PanelRenderer,
-            metadata: {
-                properties: {
-                    type: {
-                        type: "string",
-                        defaultValue: "column"
+            "renderer": PanelRenderer,
+            "metadata": {
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "defaultValue": "column"
                     },
-                    modelName: {
-                        type: "string",
-                        defaultValue: ""
+                    "modelName": {
+                        "type": "string",
+                        "defaultValue": ""
                     },
-                    entity: {
-                        type: "string",
-                        defaultValue: "/"
+                    "entity": {
+                        "type": "string",
+                        "defaultValue": "/"
                     },
-                    parameters: {
-                        type: "object",
-                        defaultValue: {}
+                    "parameters": {
+                        "type": "object",
+                        "defaultValue": {}
                     },
-                    title: {
-                        type: "string",
-                        defaultValue: ""
+                    "title": {
+                        "type": "string",
+                        "defaultValue": ""
                     },
-                    showLegend: {
-                        type: "boolean",
-                        defaultValue: false
+                    "showLegend": {
+                        "type": "boolean",
+                        "defaultValue": false
                     },
-                    showTitle: {
-                        type: "boolean",
-                        defaultValue: false
+                    "showTitle": {
+                        "type": "boolean",
+                        "defaultValue": false
                     },
-                    vizProperties: {
-                        type: "object",
-                        defaultValue: {}
+                    "vizProperties": {
+                        "type": "object",
+                        "defaultValue": {}
                     }
                 },
-                aggregations: {
-                    measures: {
-                        multiple: true,
-                        singularName: "measure",
-                        type: "com.bearingpoint.ChartFeedItem"
+                "aggregations": {
+                    "measures": {
+                        "bindable": true,
+                        "multiple": true,
+                        "singularName": "measure",
+                        "type": "com.bearingpoint.ChartFeedItem"
                     },
-                    dimensions: {
-                        multiple: true,
-                        singularName: "dimension",
-                        type: "com.bearingpoint.ChartFeedItem"
+                    "dimensions": {
+                        "bindable": true,
+                        "multiple": true,
+                        "singularName": "dimension",
+                        "type": "com.bearingpoint.ChartFeedItem"
                     },
-                    colors: {
-                        multiple: true,
-                        singularName: "color",
-                        type: "com.bearingpoint.ChartFeedItem"
+                    "colors": {
+                        "bindable": true,
+                        "multiple": true,
+                        "singularName": "color",
+                        "type": "com.bearingpoint.ChartFeedItem"
                     }
-                },
-                events: {}
+                }
             }
         });
 

@@ -3,9 +3,10 @@ sap.ui.define(
         "sap/ui/layout/Splitter",
         "sap/m/PanelRenderer",
         "sap/ui/layout/VerticalLayout",
-        "com/bearingpoint/StandardChart"
+        "com/bearingpoint/StandardChart",
+        "sap/ui/comp/variants/VariantManagement"
     ],
-    function (Splitter, PanelRenderer, VerticalLayout, StandardChart) {
+    function (Splitter, PanelRenderer, VerticalLayout, StandardChart, VariantManagement) {
         "use strict";
 
         $.sap.require("com.bearingpoint.ChartFeedItem");
@@ -27,19 +28,29 @@ sap.ui.define(
                 },
                 "aggregations": {
                     "availableMeasures": {
+                        "bindable": true,
                         "multiple": true,
                         "singularName": "availableMeasure",
                         "type": "com.bearingpoint.ChartFeedItem"
                     },
                     "availableDimensions": {
+                        "bindable": true,
                         "multiple": true,
                         "singularName": "availableDimension",
                         "type": "com.bearingpoint.ChartFeedItem"
                     },
                     "colors": {
+                        "bindable": true,
                         "multiple": true,
                         "singularName": "availableColor",
                         "type": "com.bearingpoint.ChartFeedItem"
+                    },
+                    "variants": {
+                        "bindable": true,
+                        "forwarding": {
+                            "getter": "getVariantManagement",
+                            "aggregation": "variantItems"
+                        }
                     }
                 },
                 "events": {
@@ -516,6 +527,10 @@ sap.ui.define(
             oModel.refresh();
         }
 
+        BEExtendedChart.prototype.getVariantManagement = function () {
+            return this._variantManagement;
+        };
+
         BEExtendedChart.prototype.setShowLabels = function (bInput) {
             this.setProperty("showLabels", bInput);
             this.setVizProperties({
@@ -550,7 +565,7 @@ sap.ui.define(
                 for (var i = measures.length - 1; i > this._currentChartConfig.maxMeasures - 1; i--) {
                     this.removeMeasure(measures[i]);
                 }
-                this._overlay.button.firePress();
+                // this._overlay.button.firePress();
             }
             if (this._currentChartConfig.minMeasures !== undefined && measures.length < this._currentChartConfig.minMeasures) {
                 this._chart.setVisible(false);
@@ -629,7 +644,7 @@ sap.ui.define(
         };
 
         BEExtendedChart.prototype.update = function () {
-            this._overlay.hide();
+            // this._overlay.hide();
             this._createDataset();
             this._refreshTable();
             this.setChartTitle(_buildTitle(this));
@@ -654,6 +669,41 @@ sap.ui.define(
             );
             oControl._configPanelState = !oControl._configPanelState;
         }
+
+        BEExtendedChart.prototype._manageVariant = function (oEvent) {
+
+        };
+
+        BEExtendedChart.prototype._saveVariant = function (oEvent) {
+            var oManager = oEvent.getSource(),
+                oVariant = oEvent.getParameters();
+            if (oVariant.overwrite) {
+                var oItem = oManager.getVariantItems().find(function (item) {
+                    return item.getKey() === oVariant.key;
+                });
+                if (!oItem) {
+                    console.warn("error getting variant context");
+                }
+                var oContext = oItem.getBindingContext();
+                oContext.setProperty("description", oVariant.name);
+                oContext.setProperty("isDefault", oVariant.def);
+                oContext.setProperty("isPublic", oVariant.global);
+                oContext.setProperty("data", {
+                    measures: this.getMeasures(),
+                    dimensions: this.getDimensions(),
+                    colors: this.getColors(),
+                    type: this.getType(),
+                    view: this.getView()
+                });
+            } else {
+                var oBinding = oManager.getBinding("variantItems");
+                oBinding.create({});
+            }
+        };
+
+        BEExtendedChart.prototype._selectVariant = function (oEvent) {
+
+        };
 
         function _createOverlay(oControl) {
             oControl._overlay = {
@@ -790,30 +840,36 @@ sap.ui.define(
             var that = this;
             this.removeAllContent();
             this._splitterLayout = new Splitter();
-            this.addButton("toggleConfig", {
-                icon: "sap-icon://customize",
-                tooltip: "TOGGLE_CONFIG",
-                press: function () {
-                    _toggleConfigPanel(that);
-                }
-            });
             this._configPanel = _createConfigPanel(this);
             this._configPanelState = false;
             _toggleConfigPanel(this);
             this._splitterLayout.addContentArea(this._chartContainer);
             this._splitterLayout.addContentArea(this._configPanel);
             this.addContent(this._splitterLayout);
-            _createOverlay(this);
+            // _createOverlay(this);
             this._chartContainer.attachContentChange(function (oEvent) {
                 var sSelected = oEvent.getParameter("selectedItemId");
                 that._chartTypeSelector.setVisible(sSelected.indexOf("table") < 0);
                 that._showLabelsToggle.setVisible(sSelected.indexOf("table") < 0);
             });
+            this._variantManagement = new VariantManagement({
+                manage: this._manageVariant.bind(this),
+                save: this._saveVariant.bind(this),
+                select: this._selectVariant.bind(this)
+            });
+            this._chartContainer.setToolbar(new sap.m.OverflowToolbar({
+                content: [
+                    new sap.m.ToolbarSeparator(),
+                    this._variantManagement,
+                    new sap.m.ToolbarSpacer(),
+                    new sap.suite.ui.commons.ChartContainerToolbarPlaceholder()
+                ]
+            }));
             this.addEventDelegate({
                 onAfterRendering: function () {
-                    _initSortable(that);
+                    _initSortable(this);
                 }
-            });
+            }, this);
             if (!(this.getParent() instanceof sap.ui.core.Control)) {
                 window.addEventListener(
                     "resize",
@@ -824,8 +880,10 @@ sap.ui.define(
             }
             setTimeout(function () {
                 _startup(that);
-
-                that._refreshTable();
+                if (that._tableSelected) {
+                    that._chartTypeSelector.setVisible(false);
+                    that._showLabelsToggle.setVisible(false);
+                }
             }, 0);
         };
         return BEExtendedChart;

@@ -13,44 +13,44 @@ sap.ui.define(
         "use strict";
         $.sap.require("com.bearingpoint.ChartFeedItem");
         var BEStandardChart = SimpleChart.extend("com.bearingpoint.StandardChart", {
-            renderer: PanelRenderer,
-            metadata: {
-                properties: {
-                    containerTitle: {
-                        type: "string",
-                        defaultValue: ""
+            "renderer": PanelRenderer,
+            "metadata": {
+                "properties": {
+                    "containerTitle": {
+                        "type": "string",
+                        "defaultValue": ""
                     },
-                    chartTitle: {
-                        type: "string",
-                        defaultValue: ""
+                    "chartTitle": {
+                        "type": "string",
+                        "defaultValue": ""
                     },
-                    showFullScreen: {
-                        type: "boolean",
-                        defaultValue: true
+                    "showFullScreen": {
+                        "type": "boolean",
+                        "defaultValue": true
                     },
-                    showZoom: {
-                        type: "boolean",
-                        defaultValue: true
+                    "showZoom": {
+                        "type": "boolean",
+                        "defaultValue": true
                     },
-                    showLegend: {
-                        type: "boolean",
-                        defaultValue: false
+                    "showLegend": {
+                        "type": "boolean",
+                        "defaultValue": false
                     },
-                    showLegendButton: {
-                        type: "boolean",
-                        defaultValue: true
+                    "showLegendButton": {
+                        "type": "boolean",
+                        "defaultValue": true
                     },
-                    showChartTitle: {
-                        type: "boolean",
-                        defaultValue: false
+                    "showChartTitle": {
+                        "type": "boolean",
+                        "defaultValue": false
                     },
-                    enableDownload: {
-                        type: "boolean",
-                        defaultValue: false
+                    "enableDownload": {
+                        "type": "boolean",
+                        "defaultValue": false
                     },
-                    downloadFileName: {
-                        type: "string",
-                        defaultValue: "Chart"
+                    "downloadFileName": {
+                        "type": "string",
+                        "defaultValue": "Chart"
                     },
                     "enableChartView": {
                         "type": "boolean",
@@ -59,9 +59,12 @@ sap.ui.define(
                     "enableTableView": {
                         "type": "boolean",
                         "defaultValue": true
+                    },
+                    "activeView": {
+                        "type": "string",
+                        "defaultValue": "chart"
                     }
-                },
-                aggregations: {}
+                }
             }
         });
 
@@ -119,6 +122,18 @@ sap.ui.define(
             } else {
                 this.removeButton("download");
             }
+        };
+
+        BEStandardChart.prototype.setActiveView = function (sInput) {
+            this.setProperty("activeView", sInput);
+            setTimeout(function () {
+                if (this.getEnableChartView() && this._chartContent && sInput === "chart") {
+                    this._chartContainer.switchChart(this._chartContent);
+                }
+                if (this.getEnableTableView() && this._tableContent && sInput === "table") {
+                    this._chartContainer.switchChart(this._tableContent);
+                }
+            }.bind(this), 100);
         };
 
         BEStandardChart.prototype.addButton = function (btnID, oInput) {
@@ -254,8 +269,6 @@ sap.ui.define(
                 content: this._table,
                 icon: "sap-icon://table-view"
             });
-            this._chartContainer.addContent(this._tableContent);
-            this._refreshTable();
         };
 
         BEStandardChart.prototype.init = function () {
@@ -268,6 +281,7 @@ sap.ui.define(
                 content: this._chart,
                 icon: "sap-icon://vertical-bar-chart"
             });
+            this._initTable();
             this._chartContainer = new ChartContainer({
                 autoAdjustHeight: true,
                 showLegend: this.getShowLegend(),
@@ -275,23 +289,37 @@ sap.ui.define(
                 showZoom: this.getShowZoom(),
                 showFullScreen: this.getShowFullScreen()
             });
-            this._chartSelected = true;
-            this._tableSelected = false;
-            this.addContent(this._chartContainer);
             setTimeout(function () {
+                that._chartSelected = that.getActiveView() === "chart";
+                that._tableSelected = that.getActiveView() === "table";
                 if (that.getEnableChartView()) {
                     that._chartContainer.addContent(that._chartContent);
                 }
                 if (that.getEnableTableView()) {
-                    that._initTable();
+                    that._chartContainer.addContent(that._tableContent);
                     that._refreshTable();
                     that._chartContainer.attachContentChange(function (oEvent) {
                         var itemID = oEvent.getParameter("selectedItemId");
                         that._tableSelected = itemID.indexOf("table") > -1;
                         that._chartSelected = itemID.indexOf("table") < 0;
+                        if (that._tableSelected) {
+                            that.setActiveView("table");
+                        }
+                        if (that._chartSelected) {
+                            that.setActiveView("chart");
+                        }
                     });
                 }
             }, 0);
+            this.addContent(this._chartContainer);
+            setTimeout(function () {
+                if (this.getEnableChartView() && this._chartContent && this.getActiveView() === "chart") {
+                    this._chartContainer.switchChart(this._chartContent);
+                }
+                if (this.getEnableTableView() && this._tableContent && this.getActiveView() === "table") {
+                    this._chartContainer.switchChart(this._tableContent);
+                }
+            }.bind(this), 100);
         };
 
         return BEStandardChart;
